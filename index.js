@@ -1,7 +1,12 @@
+const { json } = require('express')
 const express = require('express')
+const morgan = require('morgan')
 const app = express()
 
+morgan.token('data', function(req, res) { return JSON.stringify(req.body) })
+
 app.use(express.json())
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
 
 let persons = [
     { 
@@ -30,7 +35,7 @@ const info = `<div>Phonebook has info for ${persons.length} people<div/>
             <div> ${new Date()}<div/>`
 
 app.get('/info', (req, res) => {
-    res.send(info)
+  res.send(info)
 })
 
 app.get('/api/persons', (req, res) => {
@@ -49,29 +54,29 @@ app.get('/api/persons/:id', (req, res) => {
 })
 
 app.post('/api/persons', (req, res) => {
-    const body = req.body
-  
-    if (!body.name || !body.number) {
-        return res.status(400).json({ 
-            error: "invalid data" 
-      })
-    }
-    const names = persons.map(person => person.name)
-    if (names.includes(body.name)) {
-        return res.status(400).json({
-            error: "person already in phonebook"
-        })
-    }
-    const person = {
-      name: body.name,
-      number: body.number,
-      id: Math.floor(Math.random() * 10000),
-    }
-  
-   persons = persons.concat(person)
-  
-    res.json(person)
-  })
+  const body = req.body
+
+  if (!body.name || !body.number) {
+    return res.status(400).json({ 
+      error: "invalid data" 
+    })
+  }
+  const names = persons.map(person => person.name)
+  if (names.includes(body.name)) {
+    return res.status(400).json({
+      error: "person already in phonebook"
+    })
+  }
+  const person = {
+    name: body.name,
+    number: body.number,
+    id: Math.floor(Math.random() * 10000),
+  }
+
+  persons = persons.concat(person)
+
+  res.json(person)
+})
 
 app.delete('/api/persons/:id', (req, res) => {
   const id = Number(req.params.id)
